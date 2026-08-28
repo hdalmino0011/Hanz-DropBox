@@ -242,6 +242,7 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .search-field {
@@ -307,6 +308,30 @@ button {
   border-right-color: transparent;
   flex: none;
 }
+
+.clear-cache-btn { color: var(--text-dim); }
+.clear-cache-btn:hover { color: var(--red); border-color: var(--red); }
+.clear-cache-btn.is-working { color: var(--amber); border-color: var(--amber-dim); }
+
+.clear-icon {
+  width: 12px;
+  height: 12px;
+  position: relative;
+  flex: none;
+}
+.clear-icon::before,
+.clear-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 13px;
+  height: 1px;
+  background: currentColor;
+  transform-origin: center;
+}
+.clear-icon::before { transform: translate(-50%, -50%) rotate(45deg); }
+.clear-icon::after { transform: translate(-50%, -50%) rotate(-45deg); }
 
 /* ledger panel */
 
@@ -600,6 +625,22 @@ button {
 
   .manifest-main { padding: 20px 14px 32px; }
 
+  .toolbar { flex-direction: column; align-items: stretch; }
+
+  .path-trail { order: 1; }
+
+  .toolbar-controls { order: 2; gap: 8px; }
+
+  .search-field { flex: 1 1 auto; }
+  .search-field input { width: 100%; max-width: none; }
+
+  .refresh-btn span:last-child { display: none; }
+  .refresh-btn {
+    padding: 9px;
+    justify-content: center;
+  }
+  .refresh-icon, .clear-icon { margin: 0; }
+
   .ledger-head { display: none; }
 
   .ledger-row {
@@ -618,6 +659,9 @@ button {
   }
 
   .row-action { justify-content: flex-end; }
+}
 
-  .search-field input { width: 120px; }
+@media (max-width: 380px) {
+  .brand-title { font-size: 20px; }
+  .stamp-value { font-size: 11px; }
 }
