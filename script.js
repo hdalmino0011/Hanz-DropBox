@@ -1,3 +1,4 @@
+// script.js
 (function () {
   "use strict";
 
@@ -14,8 +15,6 @@
   };
 
   var els = {
-    repoStampValue: document.getElementById("repoStampValue"),
-    footerRepoLabel: document.getElementById("footerRepoLabel"),
     pathTrail: document.getElementById("pathTrail"),
     searchInput: document.getElementById("searchInput"),
     refreshBtn: document.getElementById("refreshBtn"),
@@ -66,13 +65,7 @@
     return url + (url.indexOf("?") === -1 ? "?" : "&") + "ref=" + encodeURIComponent(branch);
   }
 
-  function setStamp() {
-    var label = owner && repo ? owner + "/" + repo : "not configured";
-    els.repoStampValue.textContent = label;
-    els.footerRepoLabel.textContent = owner && repo
-      ? "reading " + owner + "/" + repo + " @ " + branch
-      : "edit config.js to set your repository";
-  }
+  // setStamp function removed
 
   function showState(kind, title, body, withAction) {
     els.ledgerList.innerHTML = "";
@@ -316,7 +309,7 @@
   }
 
   function init() {
-    setStamp();
+    // setStamp() removed
     renderBreadcrumbs();
     fetchFolder(state.currentPath);
 
