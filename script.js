@@ -19,11 +19,6 @@
     searchInput: document.getElementById("searchInput"),
     refreshBtn: document.getElementById("refreshBtn"),
     clearCacheBtn: document.getElementById("clearCacheBtn"),
-    listState: document.getElementById("listState"),
-    stateIcon: document.getElementById("stateIcon"),
-    stateTitle: document.getElementById("stateTitle"),
-    stateBody: document.getElementById("stateBody"),
-    stateActionBtn: document.getElementById("stateActionBtn"),
     ledgerList: document.getElementById("ledgerList")
   };
 
@@ -65,17 +60,10 @@
     return url + (url.indexOf("?") === -1 ? "?" : "&") + "ref=" + encodeURIComponent(branch);
   }
 
-  function showState(kind, title, body, withAction) {
-    els.ledgerList.innerHTML = "";
-    els.listState.hidden = false;
-    els.stateIcon.className = "state-icon " + kind;
-    els.stateTitle.textContent = title;
-    els.stateBody.textContent = body;
-    els.stateActionBtn.hidden = !withAction;
-  }
-
-  function hideState() {
-    els.listState.hidden = true;
+  function showMessage(text) {
+    // Display a simple message inside the list
+    var list = els.ledgerList;
+    list.innerHTML = '<li class="ledger-row" style="justify-content:center; text-align:center; color:var(--text-dim); padding:40px 20px;">' + text + '</li>';
   }
 
   function renderBreadcrumbs() {
@@ -153,17 +141,9 @@
     });
 
     if (filtered.length === 0) {
-      hideState();
-      var emptyKind = query ? "warn" : "empty";
-      showState(
-        emptyKind,
-        query ? "No matches" : "This folder is empty",
-        query ? "Nothing here matches \u201c" + state.query + "\u201d." : "Push some files to this folder in the repository to see them here."
-      );
+      showMessage(query ? "No matches for \"" + state.query + "\"" : "This folder is empty");
       return;
     }
-
-    hideState();
 
     filtered.forEach(function (entry) {
       var row = document.createElement("li");
@@ -247,17 +227,11 @@
 
   function fetchFolder(path) {
     if (!owner || !repo) {
-      showState(
-        "warn",
-        "Repository not configured",
-        "Open config.js and set owner, repo and branch to point this page at your GitHub repository.",
-        false
-      );
+      showMessage("Repository not configured – edit config.js");
       return;
     }
 
-    // Hide any previous state – no loading message
-    hideState();
+    // Clear the list – no loading message
     els.ledgerList.innerHTML = "";
 
     var url = apiUrl(path);
@@ -301,17 +275,13 @@
         clearTimeout(timeoutId);
         console.error("Fetch error:", err);
         if (err && err.name === "AbortError") {
-          showState("warn", "Request timed out",
-            "GitHub API took too long to respond. Check your internet or try again later.", false);
+          showMessage("Request timed out – check your connection");
         } else if (err && err.kind === "notfound") {
-          showState("warn", "Folder not found",
-            "GitHub couldn\u2019t find that path in " + owner + "/" + repo + ". Check the repository, branch and path in config.js.", false);
+          showMessage("Folder not found – check path in config.js");
         } else if (err && err.kind === "ratelimit") {
-          showState("warn", "Rate limit reached",
-            "GitHub\u2019s public API allows a limited number of unauthenticated requests per hour from your location. Try again shortly.", false);
+          showMessage("GitHub API rate limit – try again later");
         } else {
-          showState("warn", "Couldn\u2019t reach GitHub",
-            "Check your connection, or confirm the repository is public and correctly set in config.js.", false);
+          showMessage("Could not reach GitHub – is the repo public?");
         }
       });
   }
