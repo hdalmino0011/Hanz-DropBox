@@ -256,14 +256,13 @@
       return;
     }
 
+    // Hide any previous state – no loading message
     hideState();
-    showState("spin", "Loading manifest\u2026", "Reading " + (path || "root") + " from " + owner + "/" + repo + ".");
     els.ledgerList.innerHTML = "";
 
     var url = apiUrl(path);
     console.log("Fetching: " + url);
 
-    // AbortController with 10-second timeout
     var controller = new AbortController();
     var timeoutId = setTimeout(function () {
       controller.abort();
