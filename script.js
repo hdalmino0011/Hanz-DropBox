@@ -19,6 +19,7 @@
     pathTrail: document.getElementById("pathTrail"),
     searchInput: document.getElementById("searchInput"),
     refreshBtn: document.getElementById("refreshBtn"),
+    clearCacheBtn: document.getElementById("clearCacheBtn"),
     listState: document.getElementById("listState"),
     stateIcon: document.getElementById("stateIcon"),
     stateTitle: document.getElementById("stateTitle"),
@@ -326,6 +327,47 @@
 
     els.refreshBtn.addEventListener("click", function () {
       fetchFolder(state.currentPath);
+    });
+
+    els.clearCacheBtn.addEventListener("click", clearCacheAndReload);
+  }
+
+  function clearCacheAndReload() {
+    var btn = els.clearCacheBtn;
+    btn.classList.add("is-working");
+    btn.disabled = true;
+    btn.querySelector("span:last-child").textContent = "Clearing\u2026";
+
+    var jobs = [];
+
+    // Wipe the Cache Storage API, if anything was ever stored there.
+    if (window.caches && caches.keys) {
+      jobs.push(
+        caches.keys().then(function (names) {
+          return Promise.all(names.map(function (name) { return caches.delete(name); }));
+        }).catch(function () {})
+      );
+    }
+
+    // Unregister any service worker, in case one is ever added later.
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+      jobs.push(
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          return Promise.all(regs.map(function (r) { return r.unregister(); }));
+        }).catch(function () {})
+      );
+    }
+
+    // Clear any local/session storage this origin may hold.
+    try { window.localStorage && localStorage.clear(); } catch (e) {}
+    try { window.sessionStorage && sessionStorage.clear(); } catch (e) {}
+
+    Promise.all(jobs).finally(function () {
+      // Cache-bust every asset by forcing a fresh navigation with a new query param,
+      // which guarantees the browser re-requests index.html, style.css, script.js and config.js.
+      var url = new URL(window.location.href);
+      url.searchParams.set("_fresh", Date.now().toString());
+      window.location.replace(url.toString());
     });
   }
 
