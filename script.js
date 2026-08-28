@@ -65,8 +65,6 @@
     return url + (url.indexOf("?") === -1 ? "?" : "&") + "ref=" + encodeURIComponent(branch);
   }
 
-  // setStamp function removed
-
   function showState(kind, title, body, withAction) {
     els.ledgerList.innerHTML = "";
     els.listState.hidden = false;
@@ -149,7 +147,6 @@
       return !query || e.name.toLowerCase().indexOf(query) !== -1;
     });
 
-    // folders first, then files, alphabetically within each
     filtered.sort(function (a, b) {
       if (a.type !== b.type) return a.type === "dir" ? -1 : 1;
       return a.name.localeCompare(b.name);
@@ -173,7 +170,6 @@
       row.className = "ledger-row";
       row.setAttribute("role", "listitem");
 
-      // name cell
       var nameCell = document.createElement("div");
       nameCell.className = "row-name";
 
@@ -202,20 +198,17 @@
       }
       row.appendChild(nameCell);
 
-      // type cell
       var typeCell = document.createElement("span");
       typeCell.className = "row-type";
       typeCell.textContent = entry.type === "dir" ? "Folder" : (getExt(entry.name) || "file").toUpperCase();
       row.appendChild(typeCell);
 
-      // size cell
       var sizeCell = document.createElement("span");
       sizeCell.className = "row-size";
       sizeCell.setAttribute("data-label", "Size:");
       sizeCell.textContent = entry.type === "dir" ? "\u2014" : formatSize(entry.size);
       row.appendChild(sizeCell);
 
-      // action cell
       var actionCell = document.createElement("div");
       actionCell.className = "row-action";
 
@@ -267,8 +260,19 @@
     showState("spin", "Loading manifest\u2026", "Reading " + (path || "root") + " from " + owner + "/" + repo + ".");
     els.ledgerList.innerHTML = "";
 
-    fetch(apiUrl(path))
+    var url = apiUrl(path);
+    console.log("Fetching: " + url);
+
+    // AbortController with 10-second timeout
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function () {
+      controller.abort();
+    }, 10000);
+
+    fetch(url, { signal: controller.signal })
       .then(function (res) {
+        clearTimeout(timeoutId);
+        console.log("Response status: " + res.status);
         if (res.status === 404) {
           throw { kind: "notfound" };
         }
@@ -295,7 +299,12 @@
         renderEntries();
       })
       .catch(function (err) {
-        if (err && err.kind === "notfound") {
+        clearTimeout(timeoutId);
+        console.error("Fetch error:", err);
+        if (err && err.name === "AbortError") {
+          showState("warn", "Request timed out",
+            "GitHub API took too long to respond. Check your internet or try again later.", false);
+        } else if (err && err.kind === "notfound") {
           showState("warn", "Folder not found",
             "GitHub couldn\u2019t find that path in " + owner + "/" + repo + ". Check the repository, branch and path in config.js.", false);
         } else if (err && err.kind === "ratelimit") {
@@ -309,7 +318,6 @@
   }
 
   function init() {
-    // setStamp() removed
     renderBreadcrumbs();
     fetchFolder(state.currentPath);
 
@@ -333,7 +341,6 @@
 
     var jobs = [];
 
-    // Wipe the Cache Storage API, if anything was ever stored there.
     if (window.caches && caches.keys) {
       jobs.push(
         caches.keys().then(function (names) {
@@ -342,7 +349,6 @@
       );
     }
 
-    // Unregister any service worker, in case one is ever added later.
     if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
       jobs.push(
         navigator.serviceWorker.getRegistrations().then(function (regs) {
@@ -351,13 +357,10 @@
       );
     }
 
-    // Clear any local/session storage this origin may hold.
     try { window.localStorage && localStorage.clear(); } catch (e) {}
     try { window.sessionStorage && sessionStorage.clear(); } catch (e) {}
 
     Promise.all(jobs).finally(function () {
-      // Cache-bust every asset by forcing a fresh navigation with a new query param,
-      // which guarantees the browser re-requests index.html, style.css, script.js and config.js.
       var url = new URL(window.location.href);
       url.searchParams.set("_fresh", Date.now().toString());
       window.location.replace(url.toString());
