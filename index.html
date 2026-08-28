@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanz's DropBox &mdash; File Archive</title>
+<meta name="description" content="A personal file archive, served straight from GitHub.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <header class="manifest-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <span class="mark-ring"></span>
+        </span>
+        <div class="brand-text">
+          <span class="brand-eyebrow">Personal File Archive</span>
+          <h1 class="brand-title">Hanz&rsquo;s DropBox</h1>
+        </div>
+      </div>
+      <div class="repo-stamp" id="repoStamp">
+        <span class="stamp-label">Source</span>
+        <span class="stamp-value" id="repoStampValue">not configured</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="manifest-main">
+
+    <section class="toolbar">
+      <div class="path-trail" id="pathTrail" aria-label="Current folder">
+        <button class="crumb is-current" data-path="" type="button">root</button>
+      </div>
+
+      <div class="toolbar-controls">
+        <div class="search-field">
+          <span class="search-icon" aria-hidden="true"></span>
+          <input type="text" id="searchInput" placeholder="Filter this folder&hellip;" autocomplete="off">
+        </div>
+        <button class="refresh-btn" id="refreshBtn" type="button" title="Reload folder">
+          <span class="refresh-icon" aria-hidden="true"></span>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="ledger-panel">
+
+      <div class="ledger-head" role="row">
+        <span class="col-name">Name</span>
+        <span class="col-type">Type</span>
+        <span class="col-size">Size</span>
+        <span class="col-action">Action</span>
+      </div>
+
+      <div id="listState" class="state-block" hidden>
+        <div class="state-icon" id="stateIcon"></div>
+        <p class="state-title" id="stateTitle">Loading manifest&hellip;</p>
+        <p class="state-body" id="stateBody">Reading the repository index.</p>
+        <button class="state-action" id="stateActionBtn" type="button" hidden>Configure repository</button>
+      </div>
+
+      <ul class="ledger-list" id="ledgerList" role="list"></ul>
+
+    </section>
+
+    <p class="footnote">
+      Files come straight from a GitHub repository&mdash;no server, no upload form on this page.
+      To add files, push them to the repository this page points at.
+    </p>
+
+  </main>
+
+  <footer class="manifest-footer">
+    <span>Hanz Dee Dalmino</span>
+    <span class="dot" aria-hidden="true"></span>
+    <span id="footerRepoLabel">configure repository.js</span>
+  </footer>
+
+  <!-- Edit this file to point the archive at your repository -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
